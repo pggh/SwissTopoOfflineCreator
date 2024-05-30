@@ -1,0 +1,11 @@
+<map>
+  <map_source>haltestellen</map_source>
+  <y_min>485000</y_min>
+  <y_max>834000</y_max>
+  <x_min>75000</x_min>
+  <x_max>296000</x_max>
+  <max_zoom>21</max_zoom>
+  <download_dir>download/haltestellen</download_dir>
+  <output_dir>orux/ch_haltestellen_50000</output_dir>
+  <output_map_name>Haltestellen 1:50000</output_map_name>
+</map>
