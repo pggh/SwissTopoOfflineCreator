@@ -26,7 +26,7 @@ for private use with [OruxMaps](https://www.oruxmaps.com/cs/en/more/downloads) o
    The area to download or export in the *.map files is in 
    [CH1903 coordinates](https://de.wikipedia.org/wiki/Schweizer_Landeskoordinaten#Umrechnung_WGS84_auf_CH1903)
 
-6. run \
+6. execute \
    `SwissTopoOfflineCreator download map\pixelkarte_25000.map`\
    as an example.\
    You can stop the download at any time and continue it by starting it again.
@@ -58,4 +58,6 @@ directory on your device. Restart OruxMaps
 ## Downloading other layers
 
 You have to extend the map_sources.xml based on the specifications found in the
-[Capabilities](https://wmts.geo.admin.ch/1.0.0/WMTSCapabilities.xml)
+[Capabilities](https://wmts.geo.admin.ch/1.0.0/WMTSCapabilities.xml).
+The API documentation can be found
+[here](https://api3.geo.admin.ch/services/sdiservices.html#gettile).
