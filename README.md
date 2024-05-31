@@ -6,8 +6,9 @@ for private use with [OruxMaps](https://www.oruxmaps.com/cs/en/more/downloads) o
 
 ## Usage
 
-1. Download the windows binaries from the [releases page](releases) or compile
-   the sources yourself.
+1. Download the windows binaries from the
+   [releases page](https://github.com/pggh/SwissTopoOfflineCreator/releases)
+   or compile the sources yourself.
 
 2. Create a working directory on you computer.
    (about 12GB required for a full 1:25000 map, about 50GB for a 1:10000 map)
