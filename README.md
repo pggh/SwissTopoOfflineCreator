@@ -42,14 +42,14 @@ for private use with [OruxMaps](https://www.oruxmaps.com/cs/en/more/downloads) o
    `SwissTopoOfflineCreator download map\swissimage_25000.map map\pixelkarte_25000.map`
 
 8. Export the maps (or a sub-area of them) using:\
-   `SwissTopoOfflineCreator extract_orux map\pixelkarte_25000.map`\
-   (The virus scanner on your machine might slow down the extract by an
+   `SwissTopoOfflineCreator export_orux map\pixelkarte_25000.map`\
+   (The virus scanner on your machine might slow down the export by an
    order of magnitude)
 
 ## Installing on OruxMaps
 
 Copy the created directories (not just the files) into the oruxmaps/mapfiles
-directory on your device. Restart OruxMaps
+directory on your device. Restart OruxMaps.
 
 ## Installing on Locus
    
