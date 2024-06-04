@@ -16,6 +16,8 @@ namespace SwissTopoOfflineCreator
                                   string mapName)
         {
             var dss = DownloadedDataStatus.FromLayers(layers, tileDir, area);
+            byte[]? transparentImage = null;
+
             bool anyMissing = false;
             foreach (var ds in dss) {
                 var errors = ds.TileStatusCount[(int)TileStatus.Error];
@@ -27,9 +29,24 @@ namespace SwissTopoOfflineCreator
                     anyMissing = true;
                     Console.Error.WriteLine($"Warning: {missing} missing tiles on zoom-level {ds.Layer.TopoZoom}.");
                 }
+                if (transparentImage == null && ds.Layer.FileExt.ToLowerInvariant().EndsWith("png")) {
+                    foreach (var tile in ds.AllTiles()) {
+                        if (ds[tile.X, tile.Y] == TileStatus.NotFound) {
+                            string imageFile = Path.Combine(tileDir, Path.ChangeExtension(tile.FilePath, DownloadedDataStatus.FileExtNotFoundOrEmpty));
+                            if (File.Exists(imageFile)) {
+                                transparentImage = File.ReadAllBytes(imageFile);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             if (anyMissing) {
                 Console.Error.WriteLine("Note: missing-warnings are normal if you used a filter-map on download.");
+            }
+
+            if (transparentImage != null) {
+                Console.Error.WriteLine("Info: map is a transparent overlay.");
             }
 
             Directory.CreateDirectory(oruxMapDir);
@@ -52,22 +69,48 @@ namespace SwissTopoOfflineCreator
             using (var db = new SqliteConnection(csb.ConnectionString)) {
                 db.Open();
                 using (var command = db.CreateCommand()) {
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS android_metadata (locale TEXT)";
+                    command.CommandText = "CREATE TABLE android_metadata (locale TEXT)";
                     command.ExecuteNonQuery();
                     command.CommandText = "INSERT INTO android_metadata (locale) VALUES (\"de_CH\")";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS tiles (x int, y int, z int, image blob, PRIMARY KEY (x,y,z))";
-                    command.ExecuteNonQuery();
-                    using (var transaction = db.BeginTransaction()) {
-                        command.Transaction = transaction;
-                        command.CommandText = "INSERT INTO tiles (x, y, z, image) VALUES ($x, $y, $z, $image)";
-                        command.Prepare();
+                    if (transparentImage != null) {
+                        command.CommandText = "CREATE TABLE tiles_tbl (x int, y int, z int, image blob, PRIMARY KEY (x,y,z))";
+                        command.ExecuteNonQuery();
+                        using (var transaction = db.BeginTransaction()) {
+                            command.Transaction = transaction;
+                            command.CommandText = "INSERT INTO tiles_tbl (x, y, z, image) VALUES ($x, $y, $z, $image)";
+                            command.Prepare();
 
-                        for (int li = 0; li < layers.Length; li++) {
-                            AddLayer(tileDir, area, dss[li], li+9, command, mapCalibration);
+                            for (int li = 0; li < layers.Length; li++) {
+                                AddLayer(tileDir, area, dss[li], li + 9, command, true, mapCalibration);
+                            }
+
+                            command.CommandText = "INSERT INTO tiles_tbl (x, y, z, image) VALUES (-1, -1, -1, $image)";
+                            command.Prepare();
+                            command.Parameters.Clear();
+                            command.Parameters.AddWithValue("$image", transparentImage);
+                            command.ExecuteNonQuery();
+
+                            transaction.Commit();
                         }
+                        command.Transaction = null;
+                        command.CommandText = "CREATE VIEW tiles (x, y, z, image) as "+
+                                              "SELECT x, y, z, coalesce(image, (SELECT image FROM tiles_tbl WHERE x = -1 and y = -1 and z = -1)) FROM tiles_tbl";
+                        command.ExecuteNonQuery();
+                    } else {
+                        command.CommandText = "CREATE TABLE tiles (x int, y int, z int, image blob, PRIMARY KEY (x,y,z))";
+                        command.ExecuteNonQuery();
+                        using (var transaction = db.BeginTransaction()) {
+                            command.Transaction = transaction;
+                            command.CommandText = "INSERT INTO tiles (x, y, z, image) VALUES ($x, $y, $z, $image)";
+                            command.Prepare();
 
-                        transaction.Commit();
+                            for (int li = 0; li < layers.Length; li++) {
+                                AddLayer(tileDir, area, dss[li], li + 9, command, false, mapCalibration);
+                            }
+
+                            transaction.Commit();
+                        }
                     }
                 }
                 db.Close();
@@ -76,7 +119,7 @@ namespace SwissTopoOfflineCreator
             oruxTracker.Save(Path.Combine(oruxMapDir, "mapinfo.otrk2.xml"));
         }
 
-        static void AddLayer(string tileDir, CH1903Rectangle area, DownloadedDataStatus status, int oruxZoom, SqliteCommand tileInsertCommand, XElement xml)
+        static void AddLayer(string tileDir, CH1903Rectangle area, DownloadedDataStatus status, int oruxZoom, SqliteCommand tileInsertCommand, bool addNullImage, XElement xml)
         {
             var layer = status.Layer;
 
@@ -112,6 +155,12 @@ namespace SwissTopoOfflineCreator
                         pY.Value = y - tilesRange.yMin;
                         pZ.Value = oruxZoom;
                         pImage.Value = File.ReadAllBytes(imageFile);
+                        tileInsertCommand.ExecuteNonQuery();
+                    } else if (addNullImage) {
+                        pX.Value = x - tilesRange.xMin;
+                        pY.Value = y - tilesRange.yMin;
+                        pZ.Value = oruxZoom;
+                        pImage.Value = DBNull.Value;
                         tileInsertCommand.ExecuteNonQuery();
                     }
                 }

@@ -54,7 +54,8 @@ directory on your device. Restart OruxMaps.
 
 ## Installing on Locus
    
-{tbd}
+Copy the created directories (not just the files) into the Android/media/menion.android.locus/maps
+directory on your device. Restart Locus.
 
 ## Downloading other layers
 

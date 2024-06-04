@@ -96,7 +96,7 @@ namespace SwissTopoOfflineCreator
             ++completedRequests;
             var relPath = request.Tile.FilePath;
             var pathData = Path.Combine(DownloadDirectory, relPath);
-            var pathNotFound = Path.ChangeExtension(pathData, ".404");
+            var pathNotFound = Path.ChangeExtension(pathData, DownloadedDataStatus.FileExtNotFoundOrEmpty);
             var pathError = Path.ChangeExtension(pathData, ".err");
             CreateDirectoryForFile(pathData);
 

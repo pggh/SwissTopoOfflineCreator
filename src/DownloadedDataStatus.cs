@@ -27,6 +27,8 @@ namespace SwissTopoOfflineCreator
 
     class DownloadedDataStatus
     {
+        public const string FileExtNotFoundOrEmpty = ".404";
+
         public static DownloadedDataStatus[] FromLayers(Layer[] layers, string downloadDirectory, CH1903Rectangle area)
         {
             var ret = new DownloadedDataStatus[layers.Length];
@@ -120,7 +122,7 @@ namespace SwissTopoOfflineCreator
                                 x >= xOffset && x < xOffset+tileStatus[y-yOffset].Length) {
                                 TileStatus status;
                                 switch (file.Extension) {
-                                case ".404": status = TileStatus.NotFound; break;
+                                case FileExtNotFoundOrEmpty: status = TileStatus.NotFound; break;
                                 case ".err": status = TileStatus.Error; break;
                                 default: status = TileStatus.Available; break;
                                 }
