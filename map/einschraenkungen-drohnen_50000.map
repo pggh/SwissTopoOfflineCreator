@@ -5,7 +5,7 @@
   <x_min>75000</x_min>
   <x_max>296000</x_max>
   <max_zoom>21</max_zoom>
-  <download_dir>download/haltestellen</download_dir>
-  <output_dir>orux/ch_haltestellen_50000</output_dir>
-  <output_map_name>Haltestellen 1:50000</output_map_name>
+  <download_dir>download/einschraenkungen-drohnen</download_dir>
+  <output_dir>orux/ch_einschraenkungen-drohnen_50000</output_dir>
+  <output_map_name>Einschränkungen für Drohnen 1:50000</output_map_name>
 </map>
